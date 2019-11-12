@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/bmizerany/assert"
+	"github.com/gookit/color"
 )
 
 func Test_grouping(t *testing.T) {
@@ -106,4 +107,27 @@ func Test_grouping(t *testing.T) {
 			assert.Equal(t, got, tt.want)
 		})
 	}
+}
+
+var src1 = `    abc
+    def
+    ghi
+`
+var src2 = `    abc
+    deg
+    ghi
+`
+var expectedResult = `--- olddoc
++++ newdoc
+@@ -1,3 +1,3 @@
+     abc
+-    def
++    deg
+     ghi
+`
+
+func TestUnified(t *testing.T) {
+	diff := Diff(src1, src2, WordByWord)
+	result := color.ClearTag(diff.Unified("olddoc", "newdoc", 1, GooKitColorTheme))
+	assert.Equal(t, expectedResult, result)
 }

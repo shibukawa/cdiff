@@ -9,7 +9,7 @@ func format(lines []Line, builder *strings.Builder, theme map[Tag]string) {
 	for _, l := range lines {
 		switch l.Ope {
 		case Insert:
-			builder.WriteString(theme[OpenInsertedLine])
+			builder.WriteString(theme[OpenInsertedLine] + "+")
 			for _, f := range l.Fragments {
 				if f.Changed {
 					builder.WriteString(theme[OpenInsertedModified])
@@ -23,7 +23,7 @@ func format(lines []Line, builder *strings.Builder, theme map[Tag]string) {
 			}
 			builder.WriteString(theme[CloseInsertedLine])
 		case Delete:
-			builder.WriteString(theme[OpenDeletedLine])
+			builder.WriteString(theme[OpenDeletedLine] + "-")
 			for _, f := range l.Fragments {
 				if f.Changed {
 					builder.WriteString(theme[OpenDeletedModified])
@@ -37,7 +37,7 @@ func format(lines []Line, builder *strings.Builder, theme map[Tag]string) {
 			}
 			builder.WriteString(theme[CloseDeletedLine])
 		case Keep:
-			builder.WriteString(theme[OpenKeepLine])
+			builder.WriteString(theme[OpenKeepLine] + " ")
 			for _, f := range l.Fragments {
 				builder.WriteString(f.Text)
 			}
@@ -108,10 +108,10 @@ func (b block) section(lines []Line) string {
 	}
 	render := func(min, max int) string {
 		start := strconv.FormatInt(int64(min), 10)
-		if max-min == 1 {
+		if max == min {
 			return start
 		}
-		return start + "," + strconv.FormatInt(int64(max-min), 10)
+		return start + "," + strconv.FormatInt(int64(max-min+1), 10)
 	}
 	return "@@ -" + render(minRemoved, maxRemoved) + " +" + render(minInserted, maxInserted) + " @@"
 }
