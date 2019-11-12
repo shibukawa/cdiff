@@ -9,7 +9,10 @@ func format(lines []Line, builder *strings.Builder, theme map[Tag]string) {
 	for _, l := range lines {
 		switch l.Ope {
 		case Insert:
-			builder.WriteString(theme[OpenInsertedLine] + "+")
+			builder.WriteString(theme[OpenInsertedLine])
+			builder.WriteString(theme[OpenInsertedNotModified])
+			builder.WriteString("+")
+			builder.WriteString(theme[CloseInsertedNotModified])
 			for _, f := range l.Fragments {
 				if f.Changed {
 					builder.WriteString(theme[OpenInsertedModified])
@@ -23,7 +26,10 @@ func format(lines []Line, builder *strings.Builder, theme map[Tag]string) {
 			}
 			builder.WriteString(theme[CloseInsertedLine])
 		case Delete:
-			builder.WriteString(theme[OpenDeletedLine] + "-")
+			builder.WriteString(theme[OpenDeletedLine])
+			builder.WriteString(theme[OpenDeletedNotModified])
+			builder.WriteString("-")
+			builder.WriteString(theme[CloseDeletedNotModified])
 			for _, f := range l.Fragments {
 				if f.Changed {
 					builder.WriteString(theme[OpenDeletedModified])

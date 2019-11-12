@@ -120,12 +120,12 @@ func lineDiff(oldText, newText string) Result {
 }
 
 func splitDiffsByNewLine(diffs []diffmatchpatch.Diff) []diffmatchpatch.Diff {
-	result := make([]diffmatchpatch.Diff, len(diffs))
+	result := make([]diffmatchpatch.Diff, 0, len(diffs))
 	for _, diff := range diffs {
 		texts := strings.Split(diff.Text, "\n")
 		for i, text := range texts {
 			if i != len(texts)-1 {
-				text = text + "\n"
+				text += "\n"
 			}
 			if text != "" {
 				result = append(result, diffmatchpatch.Diff{
@@ -144,25 +144,20 @@ func wordDiff(oldText, newText string) Result {
 	dmp := diffmatchpatch.New()
 	for i := 0; i < len(blocks); i++ {
 		if i != len(blocks)-1 && blocks[i].Ope == Delete && blocks[i+1].Ope == Insert {
-			oldLineNumber := blocks[i].OldLineNumber
-			newLineNumber := blocks[i].NewLineNumber
 			diffs := dmp.DiffMain(blocks[i].Text, blocks[i+1].Text, true)
 			diffs = splitDiffsByNewLine(diffs)
 			var fragments []Fragment
+			oldLineNumber := blocks[i].OldLineNumber
+			newLineNumber := blocks[i].NewLineNumber
 			for _, diff := range diffs {
-				hasNewLine := strings.HasSuffix(diff.Text, "\n")
-				text := strings.TrimRight(diff.Text, "\n")
-				if diff.Type == diffmatchpatch.DiffEqual {
-					fragments = append(fragments, Fragment{
-						Changed: false,
-						Text:    text,
-					})
-				} else if diff.Type == diffmatchpatch.DiffDelete {
-					fragments = append(fragments, Fragment{
-						Changed: true,
-						Text:    text,
-					})
+				if diff.Type == diffmatchpatch.DiffInsert {
+					continue
 				}
+				hasNewLine := strings.HasSuffix(diff.Text, "\n")
+				fragments = append(fragments, Fragment{
+					Changed: diff.Type == diffmatchpatch.DiffDelete,
+					Text:    strings.TrimRight(diff.Text, "\n"),
+				})
 				if hasNewLine {
 					result.Lines = append(result.Lines, Line{
 						Ope:           Delete,
@@ -175,20 +170,17 @@ func wordDiff(oldText, newText string) Result {
 				}
 			}
 			fragments = nil
+			oldLineNumber = blocks[i+1].OldLineNumber
+			newLineNumber = blocks[i+1].NewLineNumber
 			for _, diff := range diffs {
-				hasNewLine := strings.HasSuffix(diff.Text, "\n")
-				text := strings.TrimRight(diff.Text, "\n")
-				if diff.Type == diffmatchpatch.DiffEqual {
-					fragments = append(fragments, Fragment{
-						Changed: false,
-						Text:    text,
-					})
-				} else if diff.Type == diffmatchpatch.DiffInsert {
-					fragments = append(fragments, Fragment{
-						Changed: true,
-						Text:    text,
-					})
+				if diff.Type == diffmatchpatch.DiffDelete {
+					continue
 				}
+				hasNewLine := strings.HasSuffix(diff.Text, "\n")
+				fragments = append(fragments, Fragment{
+					Changed: diff.Type == diffmatchpatch.DiffInsert,
+					Text:    strings.TrimRight(diff.Text, "\n"),
+				})
 				if hasNewLine {
 					result.Lines = append(result.Lines, Line{
 						Ope:           Insert,
