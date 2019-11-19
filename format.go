@@ -1,11 +1,12 @@
 package cdiff
 
 import (
+	"github.com/gookit/color"
 	"strconv"
 	"strings"
 )
 
-func format(lines []Line, builder *strings.Builder, theme map[Tag]string) {
+func formatWithTag(lines []Line, builder *strings.Builder, theme map[Tag]string) {
 	for _, l := range lines {
 		switch l.Ope {
 		case Insert:
@@ -52,10 +53,41 @@ func format(lines []Line, builder *strings.Builder, theme map[Tag]string) {
 	}
 }
 
+func formatWithTheme(lines []Line, builder *strings.Builder, theme map[Tag]color.Style) {
+	for _, l := range lines {
+		switch l.Ope {
+		case Insert:
+			builder.WriteString(theme[OpenInsertedNotModified].Sprint("+"))
+			for _, f := range l.Fragments {
+				if f.Changed {
+					builder.WriteString(theme[OpenInsertedModified].Sprint(f.Text))
+				} else {
+					builder.WriteString(theme[OpenInsertedNotModified].Sprint(f.Text))
+				}
+			}
+		case Delete:
+			builder.WriteString(theme[OpenDeletedNotModified].Sprint("-"))
+			for _, f := range l.Fragments {
+				if f.Changed {
+					builder.WriteString(theme[OpenDeletedModified].Sprint(f.Text))
+				} else {
+					builder.WriteString(theme[OpenDeletedNotModified].Sprint(f.Text))
+				}
+			}
+		case Keep:
+			builder.WriteString(" ")
+			for _, f := range l.Fragments {
+				builder.WriteString(f.Text)
+			}
+		}
+		builder.WriteString("\n")
+	}
+}
+
 // Format returns formatted text
 func (r Result) Format(theme map[Tag]string) string {
 	var builder strings.Builder
-	format(r.Lines, &builder, theme)
+	formatWithTag(r.Lines, &builder, theme)
 	return builder.String()
 }
 
@@ -163,8 +195,8 @@ func grouping(lines []Line, extraLine int) []block {
 	return result
 }
 
-// Unified returns unified format diff text
-func (r Result) Unified(oldTitle, newTitle string, l int, theme map[Tag]string) string {
+// Unified returns unified formatWithTag diff text
+func (r Result) UnifiedWithTag(oldTitle, newTitle string, l int, theme map[Tag]string) string {
 	var builder strings.Builder
 	builder.WriteString(theme[OpenHeader])
 	builder.WriteString("--- " + oldTitle)
@@ -178,7 +210,19 @@ func (r Result) Unified(oldTitle, newTitle string, l int, theme map[Tag]string) 
 		builder.WriteString(block.section(r.Lines))
 		builder.WriteString(theme[CloseSection])
 		lines := r.Lines[block.start : block.end+1]
-		format(lines, &builder, theme)
+		formatWithTag(lines, &builder, theme)
+	}
+	return builder.String()
+}
+
+func (r Result) UnifiedWithGooKitColor(oldTitle, newTitle string, l int, theme map[Tag]color.Style) string {
+	var builder strings.Builder
+	builder.WriteString(theme[OpenHeader].Sprint("--- " + oldTitle + "\n+++ " + newTitle + "\n"))
+	blocks := grouping(r.Lines, l)
+	for _, block := range blocks {
+		builder.WriteString(theme[OpenSection].Sprint(block.section(r.Lines)))
+		lines := r.Lines[block.start : block.end+1]
+		formatWithTheme(lines, &builder, theme)
 	}
 	return builder.String()
 }

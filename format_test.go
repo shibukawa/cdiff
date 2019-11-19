@@ -128,6 +128,6 @@ var expectedResult = `--- olddoc
 
 func TestUnified(t *testing.T) {
 	diff := Diff(src1, src2, WordByWord)
-	result := color.ClearTag(diff.Unified("olddoc", "newdoc", 1, GooKitColorTheme))
+	result := color.ClearTag(diff.UnifiedWithTag("olddoc", "newdoc", 1, GooKitColorTag))
 	assert.Equal(t, expectedResult, result)
 }

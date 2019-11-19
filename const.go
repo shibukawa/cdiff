@@ -1,6 +1,9 @@
 package cdiff
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/gookit/color"
+)
 
 // DiffType is an option of Diff()
 type DiffType int
@@ -60,8 +63,8 @@ const (
 	CloseHeader
 )
 
-// GooKitColorTheme is a theme for Result.Format() method for coloring console
-var GooKitColorTheme = map[Tag]string{
+// GooKitColorTag is a theme for Result.Format() method for coloring console
+var GooKitColorTag = map[Tag]string{
 	OpenDeletedLine:          "",
 	CloseDeletedLine:         "\n",
 	OpenDeletedModified:      "<fg=black;bg=red;>",
@@ -82,8 +85,21 @@ var GooKitColorTheme = map[Tag]string{
 	CloseHeader:              "\n",
 }
 
+// GooKitColorTheme is a theme for Result.Format() method for coloring console
+var GooKitColorTheme = map[Tag]color.Style{
+	OpenDeletedLine:         nil,
+	OpenDeletedModified:     color.New(color.FgBlack, color.BgRed),
+	OpenDeletedNotModified:  color.New(color.Red),
+	OpenInsertedLine:        nil,
+	OpenInsertedModified:    color.New(color.FgBlack, color.BgGreen),
+	OpenInsertedNotModified: color.New(color.Red),
+	OpenKeepLine:            nil,
+	OpenSection:             color.New(color.Cyan),
+	OpenHeader:              nil,
+}
+
 // HTMLTheme is a theme for Result.Format() method for generating HTML
-var HTMLTheme = map[Tag]string{
+var HTMLTag = map[Tag]string{
 	OpenDeletedLine:          `<div style="background-color: #ffecec;">`,
 	CloseDeletedLine:         `</div>`,
 	OpenDeletedModified:      `<span style="background-color: #f8cbcb;">`,
