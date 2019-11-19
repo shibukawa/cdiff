@@ -92,7 +92,7 @@ var GooKitColorTheme = map[Tag]color.Style{
 	OpenDeletedNotModified:  color.New(color.Red),
 	OpenInsertedLine:        nil,
 	OpenInsertedModified:    color.New(color.FgBlack, color.BgGreen),
-	OpenInsertedNotModified: color.New(color.Red),
+	OpenInsertedNotModified: color.New(color.Green),
 	OpenKeepLine:            nil,
 	OpenSection:             color.New(color.Cyan),
 	OpenHeader:              nil,
