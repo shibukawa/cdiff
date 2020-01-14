@@ -3,8 +3,8 @@ package cdiff
 import (
 	"testing"
 
-	"github.com/bmizerany/assert"
 	"github.com/gookit/color"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_grouping(t *testing.T) {
